@@ -1,22 +1,17 @@
-# promptstore_aws
+# PromptStore
 
-A clean, responsive single-page web application designed to catalog AI art and image generation prompts. Built as a capstone project for my AWS cloud internship to demonstrate a practical decoupled architecture running within the AWS Free Tier.
+A single-page AI prompt and artwork showcase built as an AWS internship capstone project.
 
----
+## Cloud Setup
+* **Compute:** AWS EC2 (Ubuntu 24.04 LTS / Nginx) serving the single-page application and Python Flask backend.
+* **Storage:** Amazon S3 bucket storing all user-uploaded images and initial assets.
+* **Architecture:** Decoupled. The application server retains zero media files on local disk; all files are streamed and stored directly via Amazon S3.
 
-## What Does This Project Do?
+## Deployment Steps
 
-This application allows users to:
-1. Browse pre-loaded AI art cards showing the image, title, and generation prompt.
-2. Copy prompts to their clipboard with a single click.
-3. Test custom additions in real time by pasting an Amazon S3 image URL, title, and prompt through an on-page modal without reloading the page.
-
----
-
-## Cloud Architecture
-
-In standard web hosting, storing large high-resolution images on the application server eats up disk space and exhausts server bandwidth. This project decouples compute from media storage:
-
-* **Compute Tier (AWS EC2):** An Ubuntu 24.04 LTS instance running Nginx serves the single `index.html` file (structure, styling, and client logic).
-* **Storage Tier (Amazon S3):** A public-read S3 bucket holds all image assets. The browser fetches images directly from S3 using unique object URLs, keeping EC2 disk usage at nearly zero.
-* **Cost Profile:** $0.00 (Operates entirely within 750 free monthly EC2 compute hours and 5 GB of S3 storage).
+1. **Amazon S3:** Create a public-read S3 bucket and attach a public read bucket policy.
+2. **AWS IAM:** Create an EC2 IAM role with `AmazonS3FullAccess` policy and attach it to the EC2 instance.
+3. **EC2 Server Setup:**
+   ```bash
+   sudo apt update && sudo apt install nginx python3-pip python3-flask python3-boto3 -y
+   sudo pip3 install flask-cors --break-system-packages
