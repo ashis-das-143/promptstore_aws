@@ -1,74 +1,78 @@
 import os
 import json
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+import uuid
 import boto3
+from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app)
 
-BUCKET_NAME = "promptstore-aws"
-AWS_REGION = "ap-southeast-2"
+ADMIN_PIN = "6706"  
+BUCKET_NAME = "promptstore-aws"  
+AWS_REGION = "ap-southeast-2"        
+DATA_FILE = "/home/ubuntu/prompts.json"
 
-s3_client = boto3.client('s3', region_name=AWS_REGION)
+s3_client = boto3.client("s3", region_name=AWS_REGION)
 
-DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'prompts.json')
+def load_prompts():
+    if not os.path.exists(DATA_FILE):
+        return []
+    try:
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return []
 
-@app.route('/prompts', methods=['GET'])
+def save_prompts(prompts):
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(prompts, f, ensure_ascii=False, indent=2)
+
+@app.route("/prompts", methods=["GET"])
 def get_prompts():
-    if os.path.exists(DATA_FILE):
-        try:
-            with open(DATA_FILE, 'r') as f:
-                return jsonify(json.load(f))
-        except Exception:
-            return jsonify([])
-    return jsonify([])
+    return jsonify(load_prompts()), 200
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    if 'image' not in request.files:
-        return jsonify({'error': 'No image file provided'}), 400
-    
-    file = request.files['image']
-    title = request.form.get('title', '')
-    prompt = request.form.get('prompt', '')
+@app.route("/upload", methods=["POST"])
+def upload():
+    # 1. Verify 4-digit PIN
+    user_pin = request.form.get("pin", "").strip()
+    if user_pin != ADMIN_PIN:
+        return jsonify({"error": "Unauthorized: Incorrect 4-digit PIN."}), 403
 
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
+    title = request.form.get("title", "").strip()
+    prompt_text = request.form.get("prompt", "").strip()
+    image_file = request.files.get("image")
 
-    filename = secure_filename(file.filename)
+    if not image_file or image_file.filename == "":
+        return jsonify({"error": "An image file is required."}), 400
+    if not prompt_text:
+        return jsonify({"error": "Prompt text is required."}), 400
+
+    ext = os.path.splitext(secure_filename(image_file.filename))[1] or ".png"
+    unique_filename = f"{uuid.uuid4().hex}{ext}"
+
     try:
         s3_client.upload_fileobj(
-            file,
+            image_file,
             BUCKET_NAME,
-            filename,
-            ExtraArgs={'ContentType': file.content_type}
+            unique_filename,
+            ExtraArgs={"ContentType": image_file.content_type or "image/jpeg"}
         )
-        image_url = f"https://{BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{filename}"
-
-        items = []
-        if os.path.exists(DATA_FILE):
-            try:
-                with open(DATA_FILE, 'r') as f:
-                    items = json.load(f)
-            except Exception:
-                items = []
-
-        new_item = {
-            "title": title,
-            "imageUrl": image_url,
-            "prompt": prompt
-        }
-        items.insert(0, new_item)
-
-        with open(DATA_FILE, 'w') as f:
-            json.dump(items, f, indent=2)
-
-        return jsonify(new_item), 200
-
+        image_url = f"https://{BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{unique_filename}"
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": f"S3 upload error: {str(e)}"}), 500
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    new_entry = {
+        "id": uuid.uuid4().hex,
+        "title": title or "Untitled",
+        "prompt": prompt_text,
+        "image_url": image_url
+    }
+
+    prompts = load_prompts()
+    prompts.insert(0, new_entry)
+    save_prompts(prompts)
+
+    return jsonify({"message": "Uploaded successfully", "item": new_entry}), 200
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
