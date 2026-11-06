@@ -1,4 +1,3 @@
-sudo tee /var/www/html/index.html > /dev/null << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,7 +95,6 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
             box-shadow: 0 6px 16px rgba(217, 70, 239, 0.35);
         }
 
-        /* 1-Line Cloud Architecture Note */
         .cloud-note-strip {
             margin: 24px 0 16px;
             background: #ffffff;
@@ -113,7 +111,7 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
             color: #1e1b4b;
         }
 
-        /* Gallery Grid (Auto image ratio, no cropping) */
+        /* Gallery Grid (No crop, auto ratio) */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -169,7 +167,6 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
             text-overflow: ellipsis;
         }
 
-        /* Empty State */
         .empty-state {
             grid-column: 1 / -1;
             text-align: center;
@@ -186,7 +183,7 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
             margin-bottom: 6px;
         }
 
-        /* Modals Common */
+        /* Modals */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -203,7 +200,6 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
             display: flex;
         }
 
-        /* Detail Modal */
         .detail-card {
             background: #ffffff;
             border-radius: 14px;
@@ -316,7 +312,6 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
             opacity: 0.92;
         }
 
-        /* Upload Modal */
         .upload-card {
             background: #ffffff;
             border-radius: 12px;
@@ -400,7 +395,6 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
 </head>
 <body>
 
-    <!-- Header -->
     <header>
         <div class="container nav-wrap">
             <div class="brand-box">
@@ -412,16 +406,12 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
     </header>
 
     <main class="container">
-        <!-- 1-Line Cloud Architecture Note -->
         <div class="cloud-note-strip">
             This website is hosted on <strong>AWS EC2</strong>, and all image assets are stored directly in <strong>Amazon S3</strong>.
         </div>
-
-        <!-- Grid: Image + Title Only -->
         <section class="grid" id="galleryGrid"></section>
     </main>
 
-    <!-- Detail Popup Modal -->
     <div class="modal-overlay" id="detailModal">
         <div class="detail-card">
             <button class="btn-cross" id="closeDetailBtn" title="Close">&times;</button>
@@ -437,7 +427,6 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
         </div>
     </div>
 
-    <!-- Upload Modal -->
     <div class="modal-overlay" id="uploadModal">
         <div class="upload-card">
             <div class="modal-header">
@@ -466,7 +455,7 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
     </div>
 
     <script>
-        let prompts = JSON.parse(localStorage.getItem("promt_store_items")) || [];
+        let prompts = [];
 
         const galleryGrid = document.getElementById("galleryGrid");
         const detailModal = document.getElementById("detailModal");
@@ -478,11 +467,22 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
 
         let currentActivePrompt = "";
 
-        // Gallery render: only Image + Title
+        async function loadPrompts() {
+            try {
+                const res = await fetch("/prompts");
+                if (res.ok) {
+                    prompts = await res.json();
+                }
+            } catch (err) {
+                console.error("Failed to load prompts:", err);
+            }
+            renderGallery();
+        }
+
         function renderGallery() {
             galleryGrid.innerHTML = "";
 
-            if (prompts.length === 0) {
+            if (!prompts || prompts.length === 0) {
                 galleryGrid.innerHTML = `
                     <div class="empty-state">
                         <h3>No images added yet</h3>
@@ -507,7 +507,6 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
             });
         }
 
-        // Open popup on image click
         function openDetail(index) {
             const item = prompts[index];
             detailImg.src = item.imageUrl;
@@ -528,7 +527,6 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
             if (e.target === detailModal) closeDetail();
         };
 
-        // Copy button handler
         copyPromptBtn.onclick = () => {
             navigator.clipboard.writeText(currentActivePrompt).then(() => {
                 copyPromptBtn.textContent = "Copied to Clipboard!";
@@ -538,7 +536,6 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
             });
         };
 
-        // Upload modal controls
         const uploadModal = document.getElementById("uploadModal");
         const openUploadBtn = document.getElementById("openUploadBtn");
         const closeUploadBtn = document.getElementById("closeUploadBtn");
@@ -554,7 +551,6 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
             if (e.target === uploadModal) uploadModal.classList.remove("open");
         };
 
-        // Backend upload handling
         uploadForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             submitUploadBtn.textContent = "Uploading...";
@@ -578,7 +574,6 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
                         imageUrl: data.imageUrl,
                         prompt: data.prompt
                     });
-                    localStorage.setItem("promt_store_items", JSON.stringify(prompts));
                     renderGallery();
                     uploadModal.classList.remove("open");
                     uploadForm.reset();
@@ -593,9 +588,7 @@ sudo tee /var/www/html/index.html > /dev/null << 'EOF'
             }
         });
 
-        // Initial render
-        renderGallery();
+        loadPrompts();
     </script>
 </body>
 </html>
-EOF
