@@ -112,7 +112,7 @@
             color: #1e1b4b;
         }
 
-        /* Gallery Grid (Only Image & Title) */
+        /* Gallery Grid */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -464,7 +464,7 @@
     </div>
 
     <script>
-        let prompts = JSON.parse(localStorage.getItem("promt_store_items")) || [];
+        let prompts = [];
 
         const galleryGrid = document.getElementById("galleryGrid");
         const detailModal = document.getElementById("detailModal");
@@ -476,10 +476,24 @@
 
         let currentActivePrompt = "";
 
+        // Server theke shob data load kora (Incognito ebong onno browser-e kaj korbe)
+        async function loadPromptsFromServer() {
+            try {
+                const res = await fetch("/prompts");
+                if (res.ok) {
+                    prompts = await res.json();
+                    renderGallery();
+                }
+            } catch (err) {
+                console.error("Failed to load prompts from server:", err);
+            }
+        }
+
+        // Gallery render
         function renderGallery() {
             galleryGrid.innerHTML = "";
 
-            if (prompts.length === 0) {
+            if (!prompts || prompts.length === 0) {
                 galleryGrid.innerHTML = `
                     <div class="empty-state">
                         <h3>No images added yet</h3>
@@ -490,26 +504,31 @@
             }
 
             prompts.forEach((item, index) => {
+                const imgUrl = item.imageUrl || item.image_url || "";
+                const title = item.title || "Untitled";
+
                 const card = document.createElement("article");
                 card.className = "card";
                 card.onclick = () => openDetail(index);
 
+                // onerror: jodi S3 theke image delete hoye thake, card-ta auto hide hoye jabe
                 card.innerHTML = `
                     <div class="card-img-wrap">
-                        <img src="${item.imageUrl}" alt="${item.title}" loading="lazy">
+                        <img src="${imgUrl}" alt="${title}" loading="lazy" onerror="this.closest('.card').style.display='none'">
                     </div>
-                    <div class="card-title">${item.title}</div>
+                    <div class="card-title">${title}</div>
                 `;
                 galleryGrid.appendChild(card);
             });
         }
 
+        // Open popup on image click
         function openDetail(index) {
             const item = prompts[index];
-            detailImg.src = item.imageUrl;
-            detailTitle.textContent = item.title;
-            detailPrompt.textContent = item.prompt;
-            currentActivePrompt = item.prompt;
+            detailImg.src = item.imageUrl || item.image_url || "";
+            detailTitle.textContent = item.title || "Untitled";
+            detailPrompt.textContent = item.prompt || "";
+            currentActivePrompt = item.prompt || "";
 
             copyPromptBtn.textContent = "Copy Prompt";
             detailModal.classList.add("open");
@@ -524,6 +543,7 @@
             if (e.target === detailModal) closeDetail();
         };
 
+        // Copy button handler
         copyPromptBtn.onclick = () => {
             navigator.clipboard.writeText(currentActivePrompt).then(() => {
                 copyPromptBtn.textContent = "Copied to Clipboard!";
@@ -576,15 +596,10 @@
 
                 const data = await res.json();
                 if (res.ok) {
-                    prompts.unshift({
-                        title: data.title,
-                        imageUrl: data.imageUrl,
-                        prompt: data.prompt
-                    });
-                    localStorage.setItem("promt_store_items", JSON.stringify(prompts));
-                    renderGallery();
                     uploadModal.classList.remove("open");
                     uploadForm.reset();
+                    // Server theke fresh list reload kora
+                    await loadPromptsFromServer();
                 } else {
                     alert("Upload error: " + data.error);
                 }
@@ -596,7 +611,8 @@
             }
         });
 
-        renderGallery();
+        // Initial load directly from server
+        loadPromptsFromServer();
     </script>
 </body>
 </html>
