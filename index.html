@@ -112,12 +112,13 @@
             color: #1e1b4b;
         }
 
-        /* Gallery Grid */
+        /* Gallery Grid: auto height aligned */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 22px;
             margin-top: 20px;
+            align-items: start;
         }
 
         .card {
@@ -135,23 +136,26 @@
             box-shadow: 0 12px 24px rgba(99, 102, 241, 0.12);
         }
 
+        /* Image Wrap with Auto Aspect Ratio */
         .card-img-wrap {
             width: 100%;
-            height: 230px;
+            height: auto;
             background: #f1f5f9;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .card-img-wrap img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: auto;
             display: block;
             transition: transform 0.3s ease;
         }
 
         .card:hover .card-img-wrap img {
-            transform: scale(1.03);
+            transform: scale(1.02);
         }
 
         .card-title {
@@ -242,7 +246,7 @@
 
         .detail-img-box {
             width: 100%;
-            max-height: 360px;
+            max-height: 480px;
             background: #0f172a;
             display: flex;
             align-items: center;
@@ -250,8 +254,10 @@
         }
 
         .detail-img-box img {
-            width: 100%;
-            max-height: 360px;
+            max-width: 100%;
+            max-height: 480px;
+            height: auto;
+            width: auto;
             object-fit: contain;
             display: block;
         }
@@ -450,7 +456,7 @@
                     <label for="imgPrompt">AI Generation Prompt</label>
                     <textarea id="imgPrompt" placeholder="Write or paste your generation prompt here..." required></textarea>
                 </div>
-                <!-- 4-Digit PIN Security Input -->
+                <!-- 4-Digit Security PIN -->
                 <div class="form-group">
                     <label for="uploadPin">Security PIN (4 Digits)</label>
                     <input type="password" id="uploadPin" maxlength="4" placeholder="Enter 4-digit PIN" inputmode="numeric" required>
@@ -476,7 +482,6 @@
 
         let currentActivePrompt = "";
 
-        // Server theke shob data load kora (Incognito ebong onno browser-e kaj korbe)
         async function loadPromptsFromServer() {
             try {
                 const res = await fetch("/prompts");
@@ -489,7 +494,6 @@
             }
         }
 
-        // Gallery render
         function renderGallery() {
             galleryGrid.innerHTML = "";
 
@@ -511,7 +515,6 @@
                 card.className = "card";
                 card.onclick = () => openDetail(index);
 
-                // onerror: jodi S3 theke image delete hoye thake, card-ta auto hide hoye jabe
                 card.innerHTML = `
                     <div class="card-img-wrap">
                         <img src="${imgUrl}" alt="${title}" loading="lazy" onerror="this.closest('.card').style.display='none'">
@@ -522,7 +525,6 @@
             });
         }
 
-        // Open popup on image click
         function openDetail(index) {
             const item = prompts[index];
             detailImg.src = item.imageUrl || item.image_url || "";
@@ -543,7 +545,6 @@
             if (e.target === detailModal) closeDetail();
         };
 
-        // Copy button handler
         copyPromptBtn.onclick = () => {
             navigator.clipboard.writeText(currentActivePrompt).then(() => {
                 copyPromptBtn.textContent = "Copied to Clipboard!";
@@ -553,7 +554,6 @@
             });
         };
 
-        // Upload modal controls
         const uploadModal = document.getElementById("uploadModal");
         const openUploadBtn = document.getElementById("openUploadBtn");
         const closeUploadBtn = document.getElementById("closeUploadBtn");
@@ -569,7 +569,6 @@
             if (e.target === uploadModal) uploadModal.classList.remove("open");
         };
 
-        // Upload submission
         uploadForm.addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -598,7 +597,6 @@
                 if (res.ok) {
                     uploadModal.classList.remove("open");
                     uploadForm.reset();
-                    // Server theke fresh list reload kora
                     await loadPromptsFromServer();
                 } else {
                     alert("Upload error: " + data.error);
@@ -611,7 +609,6 @@
             }
         });
 
-        // Initial load directly from server
         loadPromptsFromServer();
     </script>
 </body>
