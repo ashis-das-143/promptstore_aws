@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)
 
 BUCKET_NAME = "promptstore-aws"
-AWS_REGION = "Asia Pacific (Sydney) ap-southeast-2"
+AWS_REGION = "ap-southeast-2"
 
 s3_client = boto3.client('s3', region_name=AWS_REGION)
 
