@@ -1,3 +1,4 @@
+sudo tee /var/www/html/index.html > /dev/null << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -112,12 +113,13 @@
             color: #1e1b4b;
         }
 
-        /* Gallery Grid (Only Image & Title) */
+        /* Gallery Grid (Auto image ratio, no cropping) */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 22px;
             margin-top: 20px;
+            align-items: start;
         }
 
         .card {
@@ -137,21 +139,24 @@
 
         .card-img-wrap {
             width: 100%;
-            height: 230px;
+            height: auto;
             background: #f1f5f9;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .card-img-wrap img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: auto;
             display: block;
+            object-fit: contain;
             transition: transform 0.3s ease;
         }
 
         .card:hover .card-img-wrap img {
-            transform: scale(1.03);
+            transform: scale(1.02);
         }
 
         .card-title {
@@ -242,7 +247,7 @@
 
         .detail-img-box {
             width: 100%;
-            max-height: 360px;
+            max-height: 420px;
             background: #0f172a;
             display: flex;
             align-items: center;
@@ -250,8 +255,10 @@
         }
 
         .detail-img-box img {
-            width: 100%;
-            max-height: 360px;
+            max-width: 100%;
+            max-height: 420px;
+            width: auto;
+            height: auto;
             object-fit: contain;
             display: block;
         }
@@ -414,7 +421,7 @@
         <section class="grid" id="galleryGrid"></section>
     </main>
 
-    <!-- Detail Popup Modal (Same page, no reload/new tab) -->
+    <!-- Detail Popup Modal -->
     <div class="modal-overlay" id="detailModal">
         <div class="detail-card">
             <button class="btn-cross" id="closeDetailBtn" title="Close">&times;</button>
@@ -459,7 +466,6 @@
     </div>
 
     <script>
-        // Kono fake data nei — user nijer upload kora data thakbe
         let prompts = JSON.parse(localStorage.getItem("promt_store_items")) || [];
 
         const galleryGrid = document.getElementById("galleryGrid");
@@ -592,3 +598,4 @@
     </script>
 </body>
 </html>
+EOF
