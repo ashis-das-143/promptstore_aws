@@ -1,8 +1,594 @@
-<span>PromptStore</span>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromtStore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
+            --gradient-accent: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+        }
 
-<!-- Heading -->
-<h1>PromptStore</h1>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
 
-<span style="font-family: system-ui, -apple-system, sans-serif; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em;">
-  Prompt<span style="color: #4f46e5;">Store</span>
-</span>
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 60px;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .nav-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+
+        .brand-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .developer-tag {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #8b5cf6;
+            margin-top: -2px;
+            letter-spacing: 0.02em;
+        }
+
+        .btn-upload {
+            background: var(--gradient-primary);
+            color: #ffffff;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(217, 70, 239, 0.25);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(217, 70, 239, 0.35);
+        }
+
+        /* 1-Line Cloud Architecture Note */
+        .cloud-note-strip {
+            margin: 24px 0 16px;
+            background: #ffffff;
+            border: 1px solid #e0e7ff;
+            border-left: 4px solid #6366f1;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.86rem;
+            color: #475569;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.05);
+        }
+
+        .cloud-note-strip strong {
+            color: #1e1b4b;
+        }
+
+        /* Gallery Grid (Only Image & Title) */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 22px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: #c084fc;
+            box-shadow: 0 12px 24px rgba(99, 102, 241, 0.12);
+        }
+
+        .card-img-wrap {
+            width: 100%;
+            height: 230px;
+            background: #f1f5f9;
+            overflow: hidden;
+        }
+
+        .card-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .card-img-wrap img {
+            transform: scale(1.03);
+        }
+
+        .card-title {
+            padding: 14px 16px;
+            font-size: 0.98rem;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: #ffffff;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            color: var(--text-sub);
+        }
+
+        .empty-state h3 {
+            font-size: 1.15rem;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        /* Modals Common */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 100;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        /* Detail Modal */
+        .detail-card {
+            background: #ffffff;
+            border-radius: 14px;
+            width: 100%;
+            max-width: 580px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+            border: 1px solid #e2e8f0;
+            animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.96); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .btn-cross {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(15, 23, 42, 0.7);
+            color: #ffffff;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: background 0.15s ease;
+        }
+
+        .btn-cross:hover {
+            background: #ef4444;
+        }
+
+        .detail-img-box {
+            width: 100%;
+            max-height: 360px;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .detail-img-box img {
+            width: 100%;
+            max-height: 360px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .detail-content {
+            padding: 20px 22px;
+        }
+
+        .detail-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #0f172a;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6366f1;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .prompt-display {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #334155;
+            line-height: 1.5;
+            max-height: 120px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            word-break: break-word;
+        }
+
+        .btn-copy {
+            background: var(--gradient-accent);
+            color: #ffffff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.15s ease;
+        }
+
+        .btn-copy:hover {
+            opacity: 0.92;
+        }
+
+        /* Upload Modal */
+        .upload-card {
+            background: #ffffff;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 440px;
+            padding: 22px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-header h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .btn-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 9px 11px;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container nav-wrap">
+            <div class="brand-box">
+                <span class="brand-name">PromtStore</span>
+                <span class="developer-tag">Developed by Ashis Das</span>
+            </div>
+            <button class="btn-upload" id="openUploadBtn">+ Upload Picture</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- 1-Line Cloud Architecture Note -->
+        <div class="cloud-note-strip">
+            This website is hosted on <strong>AWS EC2</strong>, and all image assets are stored directly in <strong>Amazon S3</strong>.
+        </div>
+
+        <!-- Grid: Image + Title Only -->
+        <section class="grid" id="galleryGrid"></section>
+    </main>
+
+    <!-- Detail Popup Modal (Same page, no reload/new tab) -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="detail-card">
+            <button class="btn-cross" id="closeDetailBtn" title="Close">&times;</button>
+            <div class="detail-img-box">
+                <img id="detailImg" src="" alt="Detail Image">
+            </div>
+            <div class="detail-content">
+                <h3 class="detail-title" id="detailTitle"></h3>
+                <span class="detail-label">Generation Prompt</span>
+                <div class="prompt-display" id="detailPrompt"></div>
+                <button class="btn-copy" id="copyPromptBtn">Copy Prompt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal-overlay" id="uploadModal">
+        <div class="upload-card">
+            <div class="modal-header">
+                <h3>Upload Image &amp; Prompt</h3>
+                <button class="btn-modal-close" id="closeUploadBtn">&times;</button>
+            </div>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="imageFile">Select Image</label>
+                    <input type="file" id="imageFile" accept="image/*" required>
+                </div>
+                <div class="form-group">
+                    <label for="imgTitle">Picture Title</label>
+                    <input type="text" id="imgTitle" placeholder="e.g. Neon Cyberpunk City" required>
+                </div>
+                <div class="form-group">
+                    <label for="imgPrompt">AI Generation Prompt</label>
+                    <textarea id="imgPrompt" placeholder="Write or paste your generation prompt here..." required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" id="cancelUploadBtn">Cancel</button>
+                    <button type="submit" class="btn-upload" id="submitUploadBtn">Upload to S3</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Kono fake data nei — user nijer upload kora data thakbe
+        let prompts = JSON.parse(localStorage.getItem("promt_store_items")) || [];
+
+        const galleryGrid = document.getElementById("galleryGrid");
+        const detailModal = document.getElementById("detailModal");
+        const detailImg = document.getElementById("detailImg");
+        const detailTitle = document.getElementById("detailTitle");
+        const detailPrompt = document.getElementById("detailPrompt");
+        const copyPromptBtn = document.getElementById("copyPromptBtn");
+        const closeDetailBtn = document.getElementById("closeDetailBtn");
+
+        let currentActivePrompt = "";
+
+        // Gallery render: only Image + Title
+        function renderGallery() {
+            galleryGrid.innerHTML = "";
+
+            if (prompts.length === 0) {
+                galleryGrid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No images added yet</h3>
+                        <p>Click on "+ Upload Picture" above to upload your first image and prompt to Amazon S3.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            prompts.forEach((item, index) => {
+                const card = document.createElement("article");
+                card.className = "card";
+                card.onclick = () => openDetail(index);
+
+                card.innerHTML = `
+                    <div class="card-img-wrap">
+                        <img src="${item.imageUrl}" alt="${item.title}" loading="lazy">
+                    </div>
+                    <div class="card-title">${item.title}</div>
+                `;
+                galleryGrid.appendChild(card);
+            });
+        }
+
+        // Open popup on image click
+        function openDetail(index) {
+            const item = prompts[index];
+            detailImg.src = item.imageUrl;
+            detailTitle.textContent = item.title;
+            detailPrompt.textContent = item.prompt;
+            currentActivePrompt = item.prompt;
+
+            copyPromptBtn.textContent = "Copy Prompt";
+            detailModal.classList.add("open");
+        }
+
+        function closeDetail() {
+            detailModal.classList.remove("open");
+        }
+
+        closeDetailBtn.onclick = closeDetail;
+        detailModal.onclick = (e) => {
+            if (e.target === detailModal) closeDetail();
+        };
+
+        // Copy button handler
+        copyPromptBtn.onclick = () => {
+            navigator.clipboard.writeText(currentActivePrompt).then(() => {
+                copyPromptBtn.textContent = "Copied to Clipboard!";
+                setTimeout(() => {
+                    copyPromptBtn.textContent = "Copy Prompt";
+                }, 1500);
+            });
+        };
+
+        // Upload modal controls
+        const uploadModal = document.getElementById("uploadModal");
+        const openUploadBtn = document.getElementById("openUploadBtn");
+        const closeUploadBtn = document.getElementById("closeUploadBtn");
+        const cancelUploadBtn = document.getElementById("cancelUploadBtn");
+        const uploadForm = document.getElementById("uploadForm");
+        const submitUploadBtn = document.getElementById("submitUploadBtn");
+
+        openUploadBtn.onclick = () => uploadModal.classList.add("open");
+        closeUploadBtn.onclick = () => uploadModal.classList.remove("open");
+        cancelUploadBtn.onclick = () => uploadModal.classList.remove("open");
+
+        uploadModal.onclick = (e) => {
+            if (e.target === uploadModal) uploadModal.classList.remove("open");
+        };
+
+        // Backend upload handling
+        uploadForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            submitUploadBtn.textContent = "Uploading...";
+            submitUploadBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append("image", document.getElementById("imageFile").files[0]);
+            formData.append("title", document.getElementById("imgTitle").value);
+            formData.append("prompt", document.getElementById("imgPrompt").value);
+
+            try {
+                const res = await fetch("/upload", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    prompts.unshift({
+                        title: data.title,
+                        imageUrl: data.imageUrl,
+                        prompt: data.prompt
+                    });
+                    localStorage.setItem("promt_store_items", JSON.stringify(prompts));
+                    renderGallery();
+                    uploadModal.classList.remove("open");
+                    uploadForm.reset();
+                } else {
+                    alert("Upload error: " + data.error);
+                }
+            } catch (err) {
+                alert("Upload failed: " + err.message);
+            } finally {
+                submitUploadBtn.textContent = "Upload to S3";
+                submitUploadBtn.disabled = false;
+            }
+        });
+
+        // Initial render
+        renderGallery();
+    </script>
+</body>
+</html>
