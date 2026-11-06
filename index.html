@@ -3,75 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PromptStore</title>
+    <title>PromtStore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f1117;
-            --card-bg: #1a1d24;
-            --accent-color: #6366f1;
-            --accent-hover: #4f46e5;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-            --border-color: #2e3440;
-            --danger: #ef4444;
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
+            --gradient-accent: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
         }
 
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
+            background-color: var(--bg-page);
             color: var(--text-main);
-            min-height: 100vh;
-            padding-bottom: 50px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 32px;
-            background: #141720;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        header h1 {
-            font-size: 1.35rem;
-            letter-spacing: -0.5px;
-        }
-
-        .upload-trigger-btn {
-            background-color: var(--accent-color);
-            color: #fff;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .upload-trigger-btn:hover {
-            background-color: var(--accent-hover);
+            line-height: 1.5;
+            padding-bottom: 60px;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 32px auto;
-            padding: 0 16px;
+            max-width: 1150px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
 
-        .gallery-grid {
+        /* Header */
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .nav-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+
+        .brand-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .developer-tag {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #8b5cf6;
+            margin-top: -2px;
+            letter-spacing: 0.02em;
+        }
+
+        .btn-upload {
+            background: var(--gradient-primary);
+            color: #ffffff;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(217, 70, 239, 0.25);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(217, 70, 239, 0.35);
+        }
+
+        /* 1-Line Cloud Architecture Note */
+        .cloud-note-strip {
+            margin: 24px 0 16px;
+            background: #ffffff;
+            border: 1px solid #e0e7ff;
+            border-left: 4px solid #6366f1;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.86rem;
+            color: #475569;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.05);
+        }
+
+        .cloud-note-strip strong {
+            color: #1e1b4b;
+        }
+
+        /* Gallery Grid (Only Image & Title) */
+        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 22px;
+            margin-top: 20px;
         }
 
         .card {
@@ -79,312 +125,483 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
 
         .card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            border-color: #c084fc;
+            box-shadow: 0 12px 24px rgba(99, 102, 241, 0.12);
         }
 
-        .card img {
+        .card-img-wrap {
             width: 100%;
-            height: 220px;
-            object-fit: cover;
-            background-color: #12141a;
+            height: 230px;
+            background: #f1f5f9;
+            overflow: hidden;
         }
 
-        .card-body {
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            flex-grow: 1;
+        .card-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .card-img-wrap img {
+            transform: scale(1.03);
         }
 
         .card-title {
-            font-size: 1.05rem;
+            padding: 14px 16px;
+            font-size: 0.98rem;
             font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .card-prompt {
-            font-size: 0.88rem;
-            color: var(--text-muted);
-            line-height: 1.45;
-            flex-grow: 1;
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: #ffffff;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            color: var(--text-sub);
+        }
+
+        .empty-state h3 {
+            font-size: 1.15rem;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        /* Modals Common */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 100;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        /* Detail Modal */
+        .detail-card {
+            background: #ffffff;
+            border-radius: 14px;
+            width: 100%;
+            max-width: 580px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+            border: 1px solid #e2e8f0;
+            animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.96); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .btn-cross {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(15, 23, 42, 0.7);
+            color: #ffffff;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: background 0.15s ease;
+        }
+
+        .btn-cross:hover {
+            background: #ef4444;
+        }
+
+        .detail-img-box {
+            width: 100%;
+            max-height: 360px;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .detail-img-box img {
+            width: 100%;
+            max-height: 360px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .detail-content {
+            padding: 20px 22px;
+        }
+
+        .detail-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #0f172a;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6366f1;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .prompt-display {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #334155;
+            line-height: 1.5;
+            max-height: 120px;
+            overflow-y: auto;
+            margin-bottom: 16px;
             word-break: break-word;
         }
 
-        .copy-btn {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 7px 12px;
-            border-radius: 6px;
+        .btn-copy {
+            background: var(--gradient-accent);
+            color: #ffffff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 0.82rem;
-            align-self: flex-start;
-            transition: all 0.2s;
-        }
-
-        .copy-btn:hover {
-            background: var(--accent-color);
-            border-color: var(--accent-color);
-        }
-
-        /* Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
             width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            padding: 16px;
+            transition: opacity 0.15s ease;
         }
 
-        .modal-content {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
+        .btn-copy:hover {
+            opacity: 0.92;
+        }
+
+        /* Upload Modal */
+        .upload-card {
+            background: #ffffff;
+            border-radius: 12px;
             width: 100%;
-            max-width: 480px;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+            max-width: 440px;
+            padding: 22px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 16px;
         }
 
-        .close-btn {
+        .modal-header h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .btn-modal-close {
             background: none;
             border: none;
-            color: var(--text-muted);
-            font-size: 1.5rem;
+            font-size: 1.3rem;
+            color: #64748b;
             cursor: pointer;
         }
 
         .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+            margin-bottom: 14px;
         }
 
         .form-group label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
+            display: block;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
         }
 
         .form-group input,
         .form-group textarea {
-            background: #111318;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px 12px;
-            color: #fff;
-            font-size: 0.95rem;
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 9px 11px;
+            font-size: 0.9rem;
+            font-family: inherit;
         }
 
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: var(--accent-color);
+            border-color: #6366f1;
         }
 
-        .pin-input {
-            letter-spacing: 6px;
-            font-size: 1.2rem !important;
-            text-align: center;
-            font-weight: bold;
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
         }
 
-        .status-msg {
-            font-size: 0.85rem;
-            min-height: 20px;
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 18px;
         }
 
-        .status-msg.error {
-            color: var(--danger);
-        }
-
-        .submit-btn {
-            background: var(--accent-color);
-            color: #fff;
-            border: none;
-            padding: 11px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.88rem;
             cursor: pointer;
-        }
-
-        .submit-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
         }
     </style>
 </head>
 <body>
 
+    <!-- Header -->
     <header>
-        <h1>PromptStore</h1>
-        <button class="upload-trigger-btn" id="openModalBtn">+ Upload Prompt</button>
+        <div class="container nav-wrap">
+            <div class="brand-box">
+                <span class="brand-name">PromtStore</span>
+                <span class="developer-tag">Developed by Ashis Das</span>
+            </div>
+            <button class="btn-upload" id="openUploadBtn">+ Upload Picture</button>
+        </div>
     </header>
 
-    <div class="container">
-        <div id="galleryContainer" class="gallery-grid"></div>
+    <main class="container">
+        <!-- 1-Line Cloud Architecture Note -->
+        <div class="cloud-note-strip">
+            This website is hosted on <strong>AWS EC2</strong>, and all image assets are stored directly in <strong>Amazon S3</strong>.
+        </div>
+
+        <!-- Grid: Image + Title Only -->
+        <section class="grid" id="galleryGrid"></section>
+    </main>
+
+    <!-- Detail Popup Modal (Same page, no reload/new tab) -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="detail-card">
+            <button class="btn-cross" id="closeDetailBtn" title="Close">&times;</button>
+            <div class="detail-img-box">
+                <img id="detailImg" src="" alt="Detail Image">
+            </div>
+            <div class="detail-content">
+                <h3 class="detail-title" id="detailTitle"></h3>
+                <span class="detail-label">Generation Prompt</span>
+                <div class="prompt-display" id="detailPrompt"></div>
+                <button class="btn-copy" id="copyPromptBtn">Copy Prompt</button>
+            </div>
+        </div>
     </div>
 
     <!-- Upload Modal -->
     <div class="modal-overlay" id="uploadModal">
-        <div class="modal-content">
+        <div class="upload-card">
             <div class="modal-header">
-                <h3>Upload New Item</h3>
-                <button class="close-btn" id="closeModalBtn">&times;</button>
+                <h3>Upload Image &amp; Prompt</h3>
+                <button class="btn-modal-close" id="closeUploadBtn">&times;</button>
             </div>
-
             <form id="uploadForm">
                 <div class="form-group">
-                    <label for="titleInput">Title</label>
-                    <input type="text" id="titleInput" placeholder="e.g., Cyberpunk Street" required>
+                    <label for="imageFile">Select Image</label>
+                    <input type="file" id="imageFile" accept="image/*" required>
                 </div>
-
                 <div class="form-group">
-                    <label for="promptInput">Prompt Description</label>
-                    <textarea id="promptInput" rows="3" placeholder="Paste full prompt text..." required></textarea>
+                    <label for="imgTitle">Picture Title</label>
+                    <input type="text" id="imgTitle" placeholder="e.g. Neon Cyberpunk City" required>
                 </div>
-
                 <div class="form-group">
-                    <label for="imageFileInput">Image File</label>
-                    <input type="file" id="imageFileInput" accept="image/*" required>
+                    <label for="imgPrompt">AI Generation Prompt</label>
+                    <textarea id="imgPrompt" placeholder="Write or paste your generation prompt here..." required></textarea>
                 </div>
-
+                <!-- Security PIN Field -->
                 <div class="form-group">
-                    <label for="pinInput">Security PIN (4 Digits)</label>
-                    <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••" inputmode="numeric" required>
+                    <label for="uploadPin">Security PIN (4 Digits)</label>
+                    <input type="password" id="uploadPin" maxlength="4" placeholder="Enter 4-digit PIN" inputmode="numeric" required>
                 </div>
-
-                <div class="status-msg" id="statusMessage"></div>
-
-                <button type="submit" class="submit-btn" id="submitBtn">Publish to Gallery</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" id="cancelUploadBtn">Cancel</button>
+                    <button type="submit" class="btn-upload" id="submitUploadBtn">Upload to S3</button>
+                </div>
             </form>
         </div>
     </div>
 
     <script>
-        const gallery = document.getElementById('galleryContainer');
-        const modal = document.getElementById('uploadModal');
-        const openBtn = document.getElementById('openModalBtn');
-        const closeBtn = document.getElementById('closeModalBtn');
-        const form = document.getElementById('uploadForm');
-        const statusMsg = document.getElementById('statusMessage');
-        const submitBtn = document.getElementById('submitBtn');
+        // Kono fake data nei — user nijer upload kora data thakbe
+        let prompts = JSON.parse(localStorage.getItem("promt_store_items")) || [];
 
-        // Modal Controls
-        openBtn.addEventListener('click', () => {
-            modal.style.display = 'flex';
-            statusMsg.textContent = '';
-            statusMsg.className = 'status-msg';
-        });
+        const galleryGrid = document.getElementById("galleryGrid");
+        const detailModal = document.getElementById("detailModal");
+        const detailImg = document.getElementById("detailImg");
+        const detailTitle = document.getElementById("detailTitle");
+        const detailPrompt = document.getElementById("detailPrompt");
+        const copyPromptBtn = document.getElementById("copyPromptBtn");
+        const closeDetailBtn = document.getElementById("closeDetailBtn");
 
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
+        let currentActivePrompt = "";
 
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) modal.style.display = 'none';
-        });
+        // Gallery render: only Image + Title
+        function renderGallery() {
+            galleryGrid.innerHTML = "";
 
-        // Fetch Prompts on load
-        async function loadPrompts() {
-            try {
-                const res = await fetch('/prompts');
-                if (!res.ok) throw new Error('Could not fetch items');
-                const items = await res.json();
-
-                gallery.innerHTML = '';
-                if (items.length === 0) {
-                    gallery.innerHTML = '<p style="color: var(--text-muted); grid-column: 1/-1;">No prompts uploaded yet.</p>';
-                    return;
-                }
-
-                items.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <img src="${item.image_url}" alt="${item.title}" loading="lazy">
-                        <div class="card-body">
-                            <h3 class="card-title">${item.title}</h3>
-                            <p class="card-prompt">${item.prompt}</p>
-                            <button class="copy-btn" onclick="navigator.clipboard.writeText('${item.prompt.replace(/'/g, "\\'")}').then(() => this.textContent = 'Copied!').catch(() => alert('Copy failed'))">Copy Prompt</button>
-                        </div>
-                    `;
-                    gallery.appendChild(card);
-                });
-            } catch (err) {
-                gallery.innerHTML = `<p style="color: var(--danger); grid-column: 1/-1;">Failed to load prompts: ${err.message}</p>`;
-            }
-        }
-
-        // Handle Upload Submission
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const pin = document.getElementById('pinInput').value.trim();
-            if (pin.length !== 4) {
-                statusMsg.textContent = 'PIN must be exactly 4 digits.';
-                statusMsg.className = 'status-msg error';
+            if (prompts.length === 0) {
+                galleryGrid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No images added yet</h3>
+                        <p>Click on "+ Upload Picture" above to upload your first image and prompt to Amazon S3.</p>
+                    </div>
+                `;
                 return;
             }
 
-            const formData = new FormData();
-            formData.append('title', document.getElementById('titleInput').value.trim());
-            formData.append('prompt', document.getElementById('promptInput').value.trim());
-            formData.append('image', document.getElementById('imageFileInput').files[0]);
-            formData.append('pin', pin);
+            prompts.forEach((item, index) => {
+                const card = document.createElement("article");
+                card.className = "card";
+                card.onclick = () => openDetail(index);
 
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Uploading...';
-            statusMsg.textContent = '';
-            statusMsg.className = 'status-msg';
+                card.innerHTML = `
+                    <div class="card-img-wrap">
+                        <img src="${item.imageUrl}" alt="${item.title}" loading="lazy">
+                    </div>
+                    <div class="card-title">${item.title}</div>
+                `;
+                galleryGrid.appendChild(card);
+            });
+        }
+
+        // Open popup on image click
+        function openDetail(index) {
+            const item = prompts[index];
+            detailImg.src = item.imageUrl;
+            detailTitle.textContent = item.title;
+            detailPrompt.textContent = item.prompt;
+            currentActivePrompt = item.prompt;
+
+            copyPromptBtn.textContent = "Copy Prompt";
+            detailModal.classList.add("open");
+        }
+
+        function closeDetail() {
+            detailModal.classList.remove("open");
+        }
+
+        closeDetailBtn.onclick = closeDetail;
+        detailModal.onclick = (e) => {
+            if (e.target === detailModal) closeDetail();
+        };
+
+        // Copy button handler
+        copyPromptBtn.onclick = () => {
+            navigator.clipboard.writeText(currentActivePrompt).then(() => {
+                copyPromptBtn.textContent = "Copied to Clipboard!";
+                setTimeout(() => {
+                    copyPromptBtn.textContent = "Copy Prompt";
+                }, 1500);
+            });
+        };
+
+        // Upload modal controls
+        const uploadModal = document.getElementById("uploadModal");
+        const openUploadBtn = document.getElementById("openUploadBtn");
+        const closeUploadBtn = document.getElementById("closeUploadBtn");
+        const cancelUploadBtn = document.getElementById("cancelUploadBtn");
+        const uploadForm = document.getElementById("uploadForm");
+        const submitUploadBtn = document.getElementById("submitUploadBtn");
+
+        openUploadBtn.onclick = () => uploadModal.classList.add("open");
+        closeUploadBtn.onclick = () => uploadModal.classList.remove("open");
+        cancelUploadBtn.onclick = () => uploadModal.classList.remove("open");
+
+        uploadModal.onclick = (e) => {
+            if (e.target === uploadModal) uploadModal.classList.remove("open");
+        };
+
+        // Backend upload handling
+        uploadForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const pinVal = document.getElementById("uploadPin").value.trim();
+            if (pinVal.length !== 4) {
+                alert("Please enter a valid 4-digit PIN.");
+                return;
+            }
+
+            submitUploadBtn.textContent = "Uploading...";
+            submitUploadBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append("image", document.getElementById("imageFile").files[0]);
+            formData.append("title", document.getElementById("imgTitle").value);
+            formData.append("prompt", document.getElementById("imgPrompt").value);
+            formData.append("pin", pinVal);
 
             try {
-                const res = await fetch('/upload', {
-                    method: 'POST',
+                const res = await fetch("/upload", {
+                    method: "POST",
                     body: formData
                 });
 
                 const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.error || 'Upload failed');
+                if (res.ok) {
+                    prompts.unshift({
+                        title: data.title,
+                        imageUrl: data.imageUrl,
+                        prompt: data.prompt
+                    });
+                    localStorage.setItem("promt_store_items", JSON.stringify(prompts));
+                    renderGallery();
+                    uploadModal.classList.remove("open");
+                    uploadForm.reset();
+                } else {
+                    alert("Upload error: " + data.error);
                 }
-
-                form.reset();
-                modal.style.display = 'none';
-                loadPrompts();
             } catch (err) {
-                statusMsg.textContent = err.message;
-                statusMsg.className = 'status-msg error';
+                alert("Upload failed: " + err.message);
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Publish to Gallery';
+                submitUploadBtn.textContent = "Upload to S3";
+                submitUploadBtn.disabled = false;
             }
         });
 
-        document.addEventListener('DOMContentLoaded', loadPrompts);
+        // Initial render
+        renderGallery();
     </script>
 </body>
 </html>
