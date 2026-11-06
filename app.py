@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-ADMIN_PIN = "6706"  
+ADMIN_PIN = "6706"                   
 BUCKET_NAME = "promptstore-aws"  
 AWS_REGION = "ap-southeast-2"        
 DATA_FILE = "/home/ubuntu/prompts.json"
@@ -33,10 +33,9 @@ def get_prompts():
 
 @app.route("/upload", methods=["POST"])
 def upload():
-    # 1. Verify 4-digit PIN
     user_pin = request.form.get("pin", "").strip()
     if user_pin != ADMIN_PIN:
-        return jsonify({"error": "Unauthorized: Incorrect 4-digit PIN."}), 403
+        return jsonify({"error": "Invalid PIN. Upload unauthorized."}), 403
 
     title = request.form.get("title", "").strip()
     prompt_text = request.form.get("prompt", "").strip()
@@ -59,20 +58,25 @@ def upload():
         )
         image_url = f"https://{BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{unique_filename}"
     except Exception as e:
-        return jsonify({"error": f"S3 upload error: {str(e)}"}), 500
+        return jsonify({"error": f"S3 upload failed: {str(e)}"}), 500
 
     new_entry = {
         "id": uuid.uuid4().hex,
         "title": title or "Untitled",
         "prompt": prompt_text,
-        "image_url": image_url
+        "imageUrl": image_url
     }
 
     prompts = load_prompts()
     prompts.insert(0, new_entry)
     save_prompts(prompts)
 
-    return jsonify({"message": "Uploaded successfully", "item": new_entry}), 200
+    return jsonify({
+        "message": "Upload successful",
+        "title": new_entry["title"],
+        "imageUrl": new_entry["imageUrl"],
+        "prompt": new_entry["prompt"]
+    }), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
