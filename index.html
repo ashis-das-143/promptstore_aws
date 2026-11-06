@@ -414,7 +414,7 @@
         <section class="grid" id="galleryGrid"></section>
     </main>
 
-    <!-- Detail Popup Modal (Same page, no reload/new tab) -->
+    <!-- Detail Popup Modal -->
     <div class="modal-overlay" id="detailModal">
         <div class="detail-card">
             <button class="btn-cross" id="closeDetailBtn" title="Close">&times;</button>
@@ -450,7 +450,7 @@
                     <label for="imgPrompt">AI Generation Prompt</label>
                     <textarea id="imgPrompt" placeholder="Write or paste your generation prompt here..." required></textarea>
                 </div>
-                <!-- Security PIN Field -->
+                <!-- 4-Digit PIN Security Input -->
                 <div class="form-group">
                     <label for="uploadPin">Security PIN (4 Digits)</label>
                     <input type="password" id="uploadPin" maxlength="4" placeholder="Enter 4-digit PIN" inputmode="numeric" required>
@@ -464,7 +464,6 @@
     </div>
 
     <script>
-        // Kono fake data nei — user nijer upload kora data thakbe
         let prompts = JSON.parse(localStorage.getItem("promt_store_items")) || [];
 
         const galleryGrid = document.getElementById("galleryGrid");
@@ -477,7 +476,6 @@
 
         let currentActivePrompt = "";
 
-        // Gallery render: only Image + Title
         function renderGallery() {
             galleryGrid.innerHTML = "";
 
@@ -506,7 +504,6 @@
             });
         }
 
-        // Open popup on image click
         function openDetail(index) {
             const item = prompts[index];
             detailImg.src = item.imageUrl;
@@ -527,7 +524,6 @@
             if (e.target === detailModal) closeDetail();
         };
 
-        // Copy button handler
         copyPromptBtn.onclick = () => {
             navigator.clipboard.writeText(currentActivePrompt).then(() => {
                 copyPromptBtn.textContent = "Copied to Clipboard!";
@@ -553,13 +549,13 @@
             if (e.target === uploadModal) uploadModal.classList.remove("open");
         };
 
-        // Backend upload handling
+        // Upload submission
         uploadForm.addEventListener("submit", async (e) => {
             e.preventDefault();
 
             const pinVal = document.getElementById("uploadPin").value.trim();
             if (pinVal.length !== 4) {
-                alert("Please enter a valid 4-digit PIN.");
+                alert("Please enter a 4-digit PIN.");
                 return;
             }
 
@@ -600,7 +596,6 @@
             }
         });
 
-        // Initial render
         renderGallery();
     </script>
 </body>
