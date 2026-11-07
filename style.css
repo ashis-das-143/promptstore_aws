@@ -102,20 +102,12 @@ header {
     color: #1e1b4b;
 }
 
-/* Gallery Masonry Layout (Eliminates vertical blank gaps while keeping true auto-ratio) */
+/* Gallery Grid: Fills row-by-row from left to right with no gaps */
 .grid {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 22px;
     margin-top: 20px;
-    align-items: flex-start;
-}
-
-.grid-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-    min-width: 0;
 }
 
 .card {
@@ -125,7 +117,8 @@ header {
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .card:hover {
@@ -134,26 +127,29 @@ header {
     box-shadow: 0 12px 24px rgba(99, 102, 241, 0.12);
 }
 
-/* Image Wrap with Auto Aspect Ratio */
+/* Uniform Preview Wrap: Perfectly aligned rows, zero blank gaps, elegant presentation */
 .card-img-wrap {
     width: 100%;
-    height: auto;
-    background: #f1f5f9;
+    height: 220px;
+    background: #0f172a;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .card-img-wrap img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
     display: block;
     transition: transform 0.3s ease;
 }
 
 .card:hover .card-img-wrap img {
-    transform: scale(1.02);
+    transform: scale(1.05);
 }
 
 .card-title {
@@ -164,11 +160,12 @@ header {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    background: var(--card-bg);
 }
 
 /* Empty State */
 .empty-state {
-    width: 100%;
+    grid-column: 1 / -1;
     text-align: center;
     padding: 60px 20px;
     background: #ffffff;
