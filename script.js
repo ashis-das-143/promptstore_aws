@@ -22,6 +22,14 @@ async function loadPromptsFromServer() {
     }
 }
 
+function getColumnCount() {
+    const width = window.innerWidth;
+    if (width < 560) return 1;
+    if (width < 860) return 2;
+    if (width < 1180) return 3;
+    return 4;
+}
+
 function renderGallery() {
     galleryGrid.innerHTML = "";
 
@@ -33,6 +41,15 @@ function renderGallery() {
             </div>
         `;
         return;
+    }
+
+    const colCount = getColumnCount();
+    const cols = [];
+    for (let c = 0; c < colCount; c++) {
+        const col = document.createElement("div");
+        col.className = "grid-col";
+        galleryGrid.appendChild(col);
+        cols.push(col);
     }
 
     prompts.forEach((item, index) => {
@@ -49,9 +66,18 @@ function renderGallery() {
             </div>
             <div class="card-title">${title}</div>
         `;
-        galleryGrid.appendChild(card);
+
+        cols[index % colCount].appendChild(card);
     });
 }
+
+let resizeTimeout;
+window.addEventListener("resize", () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        renderGallery();
+    }, 150);
+});
 
 function openDetail(index) {
     const item = prompts[index];
@@ -96,6 +122,14 @@ cancelUploadBtn.onclick = () => uploadModal.classList.remove("open");
 uploadModal.onclick = (e) => {
     if (e.target === uploadModal) uploadModal.classList.remove("open");
 };
+
+// Press ESC to close any modal
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+        closeDetail();
+        uploadModal.classList.remove("open");
+    }
+});
 
 uploadForm.addEventListener("submit", async (e) => {
     e.preventDefault();
