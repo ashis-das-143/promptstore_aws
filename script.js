@@ -22,10 +22,20 @@ async function loadPromptsFromServer() {
     }
 }
 
+function getColumnCount() {
+    const width = galleryGrid.clientWidth || window.innerWidth - 40;
+    if (width < 520) return 1;
+    if (width < 800) return 2;
+    if (width < 1040) return 3;
+    return 4;
+}
+
 function renderGallery() {
     galleryGrid.innerHTML = "";
 
-    if (!prompts || prompts.length === 0) {
+    const validPrompts = (prompts || []).filter(item => item && (item.imageUrl || item.image_url));
+
+    if (validPrompts.length === 0) {
         galleryGrid.innerHTML = `
             <div class="empty-state">
                 <h3>No images added yet</h3>
@@ -35,7 +45,16 @@ function renderGallery() {
         return;
     }
 
-    prompts.forEach((item, index) => {
+    const colCount = getColumnCount();
+    const cols = [];
+    for (let c = 0; c < colCount; c++) {
+        const col = document.createElement("div");
+        col.className = "grid-col";
+        galleryGrid.appendChild(col);
+        cols.push(col);
+    }
+
+    validPrompts.forEach((item, index) => {
         const imgUrl = item.imageUrl || item.image_url || "";
         const title = item.title || "Untitled";
 
@@ -50,9 +69,17 @@ function renderGallery() {
             <div class="card-title">${title}</div>
         `;
 
-        galleryGrid.appendChild(card);
+        cols[index % colCount].appendChild(card);
     });
 }
+
+let resizeTimeout;
+window.addEventListener("resize", () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        renderGallery();
+    }, 150);
+});
 
 function openDetail(index) {
     const item = prompts[index];
