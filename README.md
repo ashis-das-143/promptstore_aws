@@ -21,7 +21,7 @@ A single-page AI prompt and artwork showcase built as an AWS internship capstone
 ## 📁 Project Structure
 
 ```text
-promptstore/
+promptstore_aws/
 ├── index.html       # Clean single-page application markup
 ├── style.css        # Responsive styling & themes
 ├── script.js        # Client-side API interactions & UI logic
