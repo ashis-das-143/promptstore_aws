@@ -22,12 +22,52 @@ async function loadPromptsFromServer() {
     }
 }
 
-function getColumnCount() {
-    const width = window.innerWidth;
-    if (width < 500) return 1;
-    if (width < 768) return 2;
-    if (width < 992) return 3;
-    return 4;
+function layoutMasonry() {
+    const grid = galleryGrid;
+    const cards = Array.from(grid.querySelectorAll(".card"));
+    if (cards.length === 0) {
+        grid.style.height = "auto";
+        return;
+    }
+
+    const gap = 22;
+    const gridWidth = grid.clientWidth || (window.innerWidth > 1150 ? 1110 : window.innerWidth - 40);
+    const minColWidth = 250;
+
+    let colCount = Math.floor((gridWidth + gap) / (minColWidth + gap));
+    if (colCount < 1) colCount = 1;
+    if (colCount > 4) colCount = 4;
+
+    const colWidth = (gridWidth - (colCount - 1) * gap) / colCount;
+    const colHeights = new Array(colCount).fill(0);
+
+    grid.style.position = "relative";
+
+    cards.forEach((card) => {
+        card.style.position = "absolute";
+        card.style.width = `${colWidth}px`;
+
+        // Pick column with minimum height (leftmost column on tie)
+        let minCol = 0;
+        let minH = colHeights[0];
+        for (let c = 1; c < colCount; c++) {
+            if (colHeights[c] < minH) {
+                minH = colHeights[c];
+                minCol = c;
+            }
+        }
+
+        const left = minCol * (colWidth + gap);
+        const top = minH;
+
+        card.style.left = `${left}px`;
+        card.style.top = `${top}px`;
+
+        colHeights[minCol] += card.offsetHeight + gap;
+    });
+
+    const maxHeight = Math.max(...colHeights);
+    grid.style.height = `${maxHeight}px`;
 }
 
 function renderGallery() {
@@ -42,16 +82,8 @@ function renderGallery() {
                 <p>Click on "+ Upload Picture" above to upload your first image and prompt to Amazon S3.</p>
             </div>
         `;
+        galleryGrid.style.height = "auto";
         return;
-    }
-
-    const colCount = getColumnCount();
-    const cols = [];
-    for (let c = 0; c < colCount; c++) {
-        const col = document.createElement("div");
-        col.className = "grid-col";
-        galleryGrid.appendChild(col);
-        cols.push(col);
     }
 
     validPrompts.forEach((item, index) => {
@@ -65,21 +97,34 @@ function renderGallery() {
 
         card.innerHTML = `
             <div class="card-img-wrap">
-                <img src="${imgUrl}" alt="${title}" loading="lazy" onerror="this.closest('.card').style.display='none'">
+                <img src="${imgUrl}" alt="${title}" loading="lazy">
             </div>
             <div class="card-title">${title}</div>
         `;
 
-        cols[index % colCount].appendChild(card);
+        const img = card.querySelector("img");
+        img.onload = () => layoutMasonry();
+        img.onerror = () => {
+            card.remove();
+            layoutMasonry();
+        };
+
+        galleryGrid.appendChild(card);
     });
+
+    layoutMasonry();
+    setTimeout(layoutMasonry, 50);
+    setTimeout(layoutMasonry, 200);
+    setTimeout(layoutMasonry, 500);
+    setTimeout(layoutMasonry, 1000);
 }
 
 let resizeTimeout;
 window.addEventListener("resize", () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
-        renderGallery();
-    }, 150);
+        layoutMasonry();
+    }, 50);
 });
 
 function openDetail(index) {
